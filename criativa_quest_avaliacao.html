@@ -133,7 +133,13 @@ function showView(v){formView.classList.toggle("hidden",v!=="form");adminView.cl
 function resetForm(){document.querySelectorAll('#questions input').forEach(x=>x.checked=false);["positive","improve","recommend"].forEach(x=>document.getElementById(x).value="")}
 async function submitResponse(){let status=formStatus,btn=sendBtn;if(!sb){status.textContent="Configure SUPABASE_URL e SUPABASE_ANON_KEY no arquivo antes de publicar.";return}
 let answers={};for(let i=1;i<=15;i++){let el=document.querySelector(`input[name=q${i}]:checked`);if(!el){status.textContent=`Responda à afirmação ${i} antes de enviar.`;document.querySelector(`[name=q${i}]`).closest(".question").scrollIntoView({behavior:"smooth",block:"center"});return}answers["q"+i]=el.value}
-btn.disabled=true;status.textContent="Enviando...";let {error}=await sb.from(TABLE).insert({answers,positive_text:positive.value.trim(),improve_text:improve.value.trim(),recommend_text:recommend.value.trim()});btn.disabled=false;if(error){status.textContent="Falha ao enviar: "+error.message;return}resetForm();status.textContent="Avaliação enviada com sucesso. Obrigado por contribuir com o Criativa Quest!"}
+btn.disabled=true;status.textContent="Enviando sua avaliação...";let {error}=await sb.from(TABLE).insert({answers,positive_text:positive.value.trim(),improve_text:improve.value.trim(),recommend_text:recommend.value.trim()});if(error){btn.disabled=false;status.textContent="Falha ao enviar: "+error.message;return}resetForm();
+// Só marcar como concluída depois que o Supabase confirmar o salvamento.
+localStorage.setItem("cq_survey_completed_v1","1");
+status.textContent="Avaliação enviada com sucesso! Muito obrigado por contribuir com o Criativa Quest. Você será direcionado à página inicial...";
+status.scrollIntoView({behavior:"smooth",block:"center"});
+btn.textContent="AVALIAÇÃO ENVIADA";
+setTimeout(()=>{window.location.replace("index.html?pesquisa=concluida")},2200)}
 async function checkSession(){let {data}=await sb.auth.getSession();if(data.session){loginPanel.classList.add("hidden");dashboard.classList.remove("hidden");loadDashboard()}else{loginPanel.classList.remove("hidden");dashboard.classList.add("hidden")}}
 async function adminLogin(){if(!sb){loginStatus.textContent="Configure a URL e a chave anon/public do Supabase no HTML.";return}let {data,error}=await sb.auth.signInWithPassword({email:adminEmail.value.trim(),password:adminPassword.value});if(error){loginStatus.textContent="Acesso não realizado: "+error.message;return}loginPanel.classList.add("hidden");dashboard.classList.remove("hidden");loadDashboard()}
 async function adminLogout(){await sb.auth.signOut();checkSession()}
