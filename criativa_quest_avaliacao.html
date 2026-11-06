@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Criativa Quest | Avaliação</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--navy:#171044;--purple:#6536a8;--pink:#f04b9b;--lime:#c9f23b;--cyan:#38c5e8;--ink:#211b35;--muted:#706b7c;--line:#e8e3ee}
+*{box-sizing:border-box}body{margin:0;background:#f3f0f8;color:var(--ink);font:16px/1.5 Arial,sans-serif}
+header{background:linear-gradient(120deg,#171044,#39206f 65%,#7139a8);color:white;padding:28px 18px 34px}
+.top,main{max-width:1100px;margin:auto}.brand{font-weight:900;letter-spacing:.08em;font-size:13px;color:var(--lime)}h1{font-size:clamp(28px,5vw,44px);margin:10px 0 5px;line-height:1.05}header p{margin:0;color:#eee8ff}
+main{padding:26px 16px 50px}.tabs,.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+button{border:0;border-radius:11px;padding:12px 16px;font-weight:800;cursor:pointer;background:var(--navy);color:white}button.secondary{background:#eee9f6;color:var(--navy)}button:disabled{opacity:.55}
+.panel,.card{background:white;border:1px solid var(--line);border-radius:17px;padding:21px;margin-bottom:17px;box-shadow:0 12px 32px #17104412}
+h2,h3{color:var(--navy);margin:0 0 7px}.muted{color:var(--muted);font-size:14px}
+.axis{margin:22px 0 10px;padding:13px 15px;background:#eee9f7;border-left:5px solid var(--pink);border-radius:10px}
+.question{padding:16px 0;border-bottom:1px solid var(--line)}.question p{font-weight:700;margin:0 0 11px}
+.options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.option{border:1px solid var(--line);padding:10px;border-radius:10px;text-align:center;font-size:13px;font-weight:700;cursor:pointer}.option input{accent-color:var(--purple)}.option:has(input:checked){background:#f2edfb;border-color:var(--purple)}
+textarea,input{width:100%;padding:12px;border:1px solid #d9d2e5;border-radius:10px;font:inherit}textarea{min-height:76px;resize:vertical}.field{margin:12px 0}.field label{font-weight:700;display:block;margin-bottom:6px}
+.hidden{display:none!important}.status{font-size:14px;margin-top:10px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.metric{background:#f8f6fb;border-radius:13px;padding:15px}.metric strong{display:block;font-size:29px;color:var(--navy)}.metric span{font-size:13px;color:var(--muted)}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:15px}.chartbox{min-height:280px;border:1px solid var(--line);border-radius:13px;padding:15px}.chartbox canvas{max-height:245px}
+.analysis{background:#f8f6fb;border-left:4px solid var(--cyan);padding:13px 15px;border-radius:9px;margin:9px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:9px;border-bottom:1px solid var(--line)}th{background:#f3eff9;color:var(--navy)}
+.pill{display:inline-block;background:#e9f8bd;color:#344500;border-radius:30px;padding:4px 9px;font-size:12px;font-weight:bold}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+@media(max-width:720px){.grid{grid-template-columns:1fr 1fr}.charts{grid-template-columns:1fr}.options{grid-template-columns:1fr 1fr}.panel{padding:16px}}
+</style></head><body>
+<header><div class="top"><div class="brand">PRODUTO EDUCACIONAL • AVALIAÇÃO</div><h1>CRIATIVA QUEST</h1><p>A aventura da publicidade brasileira — questionário de avaliação do produto educacional.</p></div></header>
+<main>
+<div class="tabs"><button id="tabForm" onclick="showView('form')">Responder questionário</button><button class="secondary" id="tabAdmin" onclick="showView('admin')">Painel administrativo</button></div>
+<section id="formView" class="panel"><h2>Avaliação do Criativa Quest</h2><p class="muted">Leia cada afirmação após explorar o jogo e marque uma única alternativa. São 15 afirmações em três eixos e três perguntas abertas opcionais.</p>
+<div id="questions"></div>
+<div class="field"><label>16. Quais aspectos do jogo você considera mais positivos? (opcional)</label><textarea id="positive" maxlength="1500"></textarea></div>
+<div class="field"><label>17. Quais aspectos precisam ser melhorados? (opcional)</label><textarea id="improve" maxlength="1500"></textarea></div>
+<div class="field"><label>18. Você recomendaria o Criativa Quest como recurso educativo? Por quê? (opcional)</label><textarea id="recommend" maxlength="1500"></textarea></div>
+<div class="actions"><button id="sendBtn" onclick="submitResponse()">Enviar avaliação</button><button class="secondary" onclick="resetForm()">Limpar respostas</button></div><div id="formStatus" class="status"></div>
+<p class="muted">Não informe dados pessoais nas respostas abertas.</p></section>
+<section id="adminView" class="hidden">
+<div id="loginPanel" class="panel"><h2>Acesso administrativo</h2><p class="muted">Entre com o usuário administrativo criado no Supabase Auth.</p>
+<div class="field"><label>E-mail administrativo</label><input id="adminEmail" type="email" autocomplete="username"></div><div class="field"><label>Senha</label><input id="adminPassword" type="password" autocomplete="current-password"></div>
+<div class="actions"><button onclick="adminLogin()">Entrar no painel</button></div><div id="loginStatus" class="status"></div></div>
+<div id="dashboard" class="hidden">
+<div class="panel"><div class="actions" style="justify-content:space-between"><div><h2>Painel de resultados</h2><p class="muted">Análise consolidada das avaliações recebidas.</p></div><div><button class="secondary" onclick="loadDashboard()">Atualizar</button> <button onclick="exportCSV()">Exportar CSV</button> <button class="secondary" onclick="adminLogout()">Sair</button></div></div></div>
+<div class="grid"><div class="metric"><strong id="total">0</strong><span>Participantes / respostas</span></div><div class="metric"><strong id="overall">—</strong><span>Concordância geral</span></div><div class="metric"><strong id="positiveCount">0</strong><span>Respostas positivas (CT + C)</span></div><div class="metric"><strong id="lastDate">—</strong><span>Resposta mais recente</span></div></div>
+<div class="panel"><h3>Resultado por eixo</h3><div id="axisSummary"></div></div>
+<div class="charts"><div class="chartbox"><h3>Concordância por eixo (%)</h3><canvas id="axisChart"></canvas></div><div class="chartbox"><h3>Distribuição das respostas</h3><canvas id="distributionChart"></canvas></div><div class="chartbox"><h3>Concordância por afirmação (%)</h3><canvas id="questionChart"></canvas></div><div class="chartbox"><h3>Participação ao longo do tempo</h3><canvas id="timelineChart"></canvas></div></div>
+<div class="panel"><h3>Análise automática dos resultados</h3><div id="autoAnalysis"></div></div><div class="panel"><h3>Respostas abertas</h3><div id="openAnswers"></div></div>
+<div class="panel"><h3>Dados das avaliações</h3><div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Geral</th><th>Comunicacional</th><th>Conceitual</th><th>Pedagógico</th></tr></thead><tbody id="responseTable"></tbody></table></div></div>
+</div></section></main><footer>Criativa Quest • Avaliação do Produto Educacional</footer>
+<script>
+/* Preencha com a URL e a chave anon/public do seu projeto Supabase. Nunca use service_role no navegador. */
+const SUPABASE_URL="COLE_AQUI_A_URL_DO_PROJETO";
+const SUPABASE_ANON_KEY="COLE_AQUI_A_CHAVE_ANON_PUBLIC";
+const TABLE="criativa_quest_respostas";
+let sb=null,responses=[],charts={};
+const axes=[
+{name:"Eixo Comunicacional",desc:"Apresentação visual, organização, navegação e experiência de interação.",qs:[
+"A identidade visual do Criativa Quest, incluindo cores, personagens e elementos gráficos, é adequada à proposta do jogo.",
+"A interface do jogo apresenta organização visual que facilita a compreensão das informações e dos comandos.",
+"Os textos, orientações e instruções apresentados no jogo são claros, objetivos e de fácil compreensão.",
+"Os elementos visuais, ilustrações, cenários e personagens contribuem para despertar o interesse do jogador.",
+"A navegação entre menus, mundos, fases e atividades ocorre de maneira intuitiva.",
+"Os recursos de interação, como botões, desafios, diálogos e elementos visuais, contribuem para uma experiência satisfatória de jogo."]},
+{name:"Eixo Conceitual",desc:"Qualidade, pertinência, organização e fundamentação dos conteúdos.",qs:[
+"O jogo apresenta conteúdos relacionados à história da publicidade brasileira de maneira pertinente à sua proposta educativa.",
+"Os conteúdos e informações apresentados nas fases do jogo são coerentes com os conceitos históricos e culturais abordados.",
+"As campanhas publicitárias, marcas e referências históricas utilizadas contribuem para a compreensão das transformações da publicidade brasileira.",
+"A organização dos mundos, personagens e desafios apresenta coerência com os conteúdos e objetivos propostos pelo jogo."]},
+{name:"Eixo Pedagógico",desc:"Potencial educativo, adequação das atividades e contribuição para o ensino e aprendizagem.",qs:[
+"O jogo apresenta atividades e desafios que estimulam a aprendizagem sobre a história da publicidade brasileira.",
+"As missões e atividades propostas estão alinhadas aos objetivos educacionais do produto.",
+"A utilização de elementos de gamificação, como fases, desafios, personagens e recompensas, favorece o envolvimento do jogador com os conteúdos.",
+"O jogo estimula a reflexão, a interpretação e o pensamento crítico sobre a publicidade, o consumo e a comunicação na sociedade brasileira.",
+"O Criativa Quest constitui um recurso educativo que pode contribuir para complementar as práticas pedagógicas em sala de aula."]}];
+const labels=["Concordo Totalmente","Concordo","Discordo","Discordo Totalmente"],codes=["CT","C","D","DT"];
+function init(){let h="",n=0;axes.forEach(a=>{h+=`<div class="axis"><h3>${a.name}</h3><div class="muted">${a.desc}</div></div>`;a.qs.forEach(q=>{n++;h+=`<div class="question"><p>${n}. ${q}</p><div class="options">${labels.map((l,i)=>`<label class="option"><input type="radio" name="q${n}" value="${codes[i]}" required> ${l}</label>`).join("")}</div></div>`})});document.getElementById("questions").innerHTML=h;
+if(SUPABASE_URL.startsWith("https://")&&!SUPABASE_ANON_KEY.startsWith("COLE_"))sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}
+function showView(v){formView.classList.toggle("hidden",v!=="form");adminView.classList.toggle("hidden",v!=="admin");tabForm.classList.toggle("secondary",v!=="form");tabAdmin.classList.toggle("secondary",v!=="admin");if(v==="admin"&&sb)checkSession()}
+function resetForm(){document.querySelectorAll('#questions input').forEach(x=>x.checked=false);["positive","improve","recommend"].forEach(x=>document.getElementById(x).value="")}
+async function submitResponse(){let status=formStatus,btn=sendBtn;if(!sb){status.textContent="Configure SUPABASE_URL e SUPABASE_ANON_KEY no arquivo antes de publicar.";return}
+let answers={};for(let i=1;i<=15;i++){let el=document.querySelector(`input[name=q${i}]:checked`);if(!el){status.textContent=`Responda à afirmação ${i} antes de enviar.`;document.querySelector(`[name=q${i}]`).closest(".question").scrollIntoView({behavior:"smooth",block:"center"});return}answers["q"+i]=el.value}
+btn.disabled=true;status.textContent="Enviando...";let {error}=await sb.from(TABLE).insert({answers,positive_text:positive.value.trim(),improve_text:improve.value.trim(),recommend_text:recommend.value.trim()});btn.disabled=false;if(error){status.textContent="Falha ao enviar: "+error.message;return}resetForm();status.textContent="Avaliação enviada com sucesso. Obrigado por contribuir com o Criativa Quest!"}
+async function checkSession(){let {data}=await sb.auth.getSession();if(data.session){loginPanel.classList.add("hidden");dashboard.classList.remove("hidden");loadDashboard()}else{loginPanel.classList.remove("hidden");dashboard.classList.add("hidden")}}
+async function adminLogin(){if(!sb){loginStatus.textContent="Configure a URL e a chave anon/public do Supabase no HTML.";return}let {data,error}=await sb.auth.signInWithPassword({email:adminEmail.value.trim(),password:adminPassword.value});if(error){loginStatus.textContent="Acesso não realizado: "+error.message;return}loginPanel.classList.add("hidden");dashboard.classList.remove("hidden");loadDashboard()}
+async function adminLogout(){await sb.auth.signOut();checkSession()}
+const groups=[[1,2,3,4,5,6],[7,8,9,10],[11,12,13,14,15]];
+function calc(rows,ids){let ct=0,c=0,d=0,dt=0;rows.forEach(r=>ids.forEach(i=>{let v=r.answers?.["q"+i];if(v==="CT")ct++;else if(v==="C")c++;else if(v==="D")d++;else if(v==="DT")dt++}));let total=ct+c+d+dt;return{ct,c,d,dt,total,pos:ct+c,ic:total?(ct+c)/total*100:0}}
+function dateFmt(s){return new Date(s).toLocaleDateString("pt-BR")}
+async function loadDashboard(){let {data,error}=await sb.from(TABLE).select("*").order("created_at",{ascending:true});if(error){alert("Erro ao carregar: "+error.message);return}responses=data||[];render()}
+function chart(id,type,labels,datasets,max){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:type==="doughnut"?"bottom":"top"}},scales:type==="doughnut"?{}:{y:{beginAtZero:true,...(max?{max}:{})}}}})}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function render(){let all=calc(responses,groups.flat()),ad=groups.map(g=>calc(responses,g)),n=responses.length;
+total.textContent=n;overall.textContent=all.total?all.ic.toFixed(1).replace(".",",")+"%":"—";positiveCount.textContent=all.pos+" / "+all.total;lastDate.textContent=n?dateFmt(responses[n-1].created_at):"—";
+axisSummary.innerHTML=axes.map((a,i)=>`<div class="analysis"><b>${a.name}: ${ad[i].ic.toFixed(1)}%</b><br>${ad[i].pos} concordâncias em ${ad[i].total} marcações. CT: ${ad[i].ct}; C: ${ad[i].c}; D: ${ad[i].d}; DT: ${ad[i].dt}.</div>`).join("");
+chart("axisChart","bar",["Comunicacional","Conceitual","Pedagógico"],[{label:"Concordância (%)",data:ad.map(x=>+x.ic.toFixed(1)),backgroundColor:["#6536a8","#f04b9b","#38a9c9"]}],100);
+chart("distributionChart","doughnut",["CT","C","D","DT"],[{data:[all.ct,all.c,all.d,all.dt],backgroundColor:["#6536a8","#38c5e8","#f5b83d","#f04b9b"]}]);
+let qv=Array.from({length:15},(_,i)=>calc(responses,[i+1]).ic);chart("questionChart","bar",qv.map((_,i)=>"Q"+(i+1)),[{label:"Concordância (%)",data:qv,backgroundColor:"#6536a8"}],100);
+let days={};responses.forEach(r=>{let d=dateFmt(r.created_at);days[d]=(days[d]||0)+1});chart("timelineChart","line",Object.keys(days),[{label:"Respostas recebidas",data:Object.values(days),borderColor:"#f04b9b",backgroundColor:"#f04b9b",tension:.25}]);
+autoAnalysis.innerHTML=n?narrative(n,all,ad,qv):"<div class='analysis'>Ainda não existem avaliações. O painel será preenchido quando os participantes enviarem os questionários.</div>";
+let open=[];responses.forEach((r,i)=>[["Aspectos positivos",r.positive_text],["Pontos a melhorar",r.improve_text],["Recomendação",r.recommend_text]].forEach(([t,v])=>{if(v?.trim())open.push(`<div class="analysis"><b>${t} • Participante ${i+1}</b><p>${esc(v)}</p></div>`)}));openAnswers.innerHTML=open.length?open.join(""):"<p class='muted'>Ainda não há respostas abertas.</p>";
+responseTable.innerHTML=responses.map(r=>`<tr><td>${dateFmt(r.created_at)}</td><td>${calc([r],groups.flat()).ic.toFixed(1)}%</td><td>${calc([r],groups[0]).ic.toFixed(1)}%</td><td>${calc([r],groups[1]).ic.toFixed(1)}%</td><td>${calc([r],groups[2]).ic.toFixed(1)}%</td></tr>`).join("")}
+function narrative(n,a,ad,q){let names=["Comunicacional","Conceitual","Pedagógico"],best=ad.indexOf(ad.reduce((x,y)=>x.ic>y.ic?x:y)),worst=ad.indexOf(ad.reduce((x,y)=>x.ic<y.ic?x:y)),hi=q.indexOf(Math.max(...q))+1,lo=q.indexOf(Math.min(...q))+1;let level=x=>x.ic>=90?"muito elevado":x.ic>=75?"elevado":x.ic>=60?"moderado":"baixo";
+return `<div class="analysis"><b>Participação:</b> ${n} avaliações completas, com ${a.total} marcações válidas nas 15 afirmações.</div><div class="analysis"><b>Concordância geral:</b> ${a.ic.toFixed(1)}%, classificada descritivamente como ${level(a)}. CT: ${a.ct}; C: ${a.c}; D: ${a.d}; DT: ${a.dt}.</div><div class="analysis"><b>Comparação dos eixos:</b> maior concordância em ${names[best]} (${ad[best].ic.toFixed(1)}%); menor em ${names[worst]} (${ad[worst].ic.toFixed(1)}%).</div><div class="analysis"><b>Afirmações:</b> Q${hi} teve maior concordância (${q[hi-1].toFixed(1)}%); Q${lo}, menor (${q[lo-1].toFixed(1)}%). Consulte os comentários abertos e o conteúdo dos itens para orientar melhorias.</div><p class="muted">Concordância = (CT + C) / total de marcações válidas × 100. As faixas são referências descritivas do painel, não critérios universais de validação. Interprete os resultados considerando o perfil e a quantidade de avaliadores.</p>`}
+function exportCSV(){let head=["data",...Array.from({length:15},(_,i)=>"Q"+(i+1)),"aspectos_positivos","melhorias","recomendacao"],rows=responses.map(r=>[r.created_at,...Array.from({length:15},(_,i)=>r.answers["q"+(i+1)]||""),r.positive_text||"",r.improve_text||"",r.recommend_text||""]);let csv=[head,...rows].map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\n"),blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="criativa_quest_avaliacoes.csv";a.click();URL.revokeObjectURL(url)}
+init();
+</script></body></html>
