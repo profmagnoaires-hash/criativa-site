@@ -272,11 +272,11 @@ async function registerVisit(){
   const localKey="cq_showcase_session_seen";
   if(!sessionStorage.getItem(localKey)){
     sessionStorage.setItem(localKey,"1");
-    if(db){const {error}=await db.from("visitas_cq_showcase").insert({});if(error)console.warn(error);}
+    if(db){const {error}=await db.from("cq_showcase_visits").insert({});if(error)console.warn(error);}
     else {let n=Number(localStorage.getItem("cq_demo_visits")||0)+1;localStorage.setItem("cq_demo_visits",n);$("visitCount").textContent=n.toLocaleString("pt-BR")+"*";return;}
   }
   if(db){
-    const {count,error}=await db.from("visitas_cq_showcase").select("*",{count:"exact",head:true});
+    const {count,error}=await db.from("cq_showcase_visits").select("*",{count:"exact",head:true});
     if(!error)$("visitCount").textContent=(count||0).toLocaleString("pt-BR");
     else $("visitCount").textContent="—";
   }else{
@@ -288,13 +288,13 @@ function renderComments(rows){
   if(!rows || !rows.length){host.innerHTML='<span class="muted">Seja o primeiro a comentar!</span>';return;}
   rows.forEach(row=>{
     const chip=document.createElement("span");chip.className="comment-chip";
-    chip.textContent=`${row.nome_do_autor}: ${row.texto_do_comentário}`;
+    chip.textContent=`${row.author_name}: ${row.comment_text}`;
     host.appendChild(chip);
   });
 }
 async function loadComments(){
   if(!db){renderComments(JSON.parse(localStorage.getItem("cq_demo_comments")||"[]"));return;}
-  const {data,error}=await db.from("comentários_de_exibição_cq").select("id,nome_do_autor,texto_do_comentário,criado_em").order("criado_em",{ascending:false}).limit(60);
+  const {data,error}=await db.from("cq_showcase_comments").select("id,author_name,comment_text,created_at").order("created_at",{ascending:false}).limit(60);
   if(error){console.warn(error);renderComments([]);return;}renderComments(data||[]);
 }
 $("commentForm").addEventListener("submit",async e=>{
@@ -303,7 +303,7 @@ $("commentForm").addEventListener("submit",async e=>{
   if(!author_name||!comment_text)return;
   const btn=e.submitter;btn.disabled=true;btn.textContent="PUBLICANDO...";
   if(db){
-    const {error}=await db.from("comentários_de_exibição_cq").insert({nome_do_autor:author_name,texto_do_comentário:comment_text});
+    const {error}=await db.from("cq_showcase_comments").insert({author_name,comment_text});
     if(error){toast("Não foi possível publicar. Verifique a configuração do Supabase.");console.error(error);}
     else{toast("Comentário publicado. Obrigado!");$("commentForm").reset();await loadComments();}
   }else{
