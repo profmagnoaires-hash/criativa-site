@@ -3,29 +3,84 @@
 <title>Criativa Quest | Avaliação</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root{--navy:#171044;--purple:#6536a8;--pink:#f04b9b;--lime:#c9f23b;--cyan:#38c5e8;--ink:#211b35;--muted:#706b7c;--line:#e8e3ee}
-*{box-sizing:border-box}body{margin:0;background:#f3f0f8;color:var(--ink);font:16px/1.5 Arial,sans-serif}
-header{background:linear-gradient(120deg,#171044,#39206f 65%,#7139a8);color:white;padding:28px 18px 34px}
-.top,main{max-width:1100px;margin:auto}.brand{font-weight:900;letter-spacing:.08em;font-size:13px;color:var(--lime)}h1{font-size:clamp(28px,5vw,44px);margin:10px 0 5px;line-height:1.05}header p{margin:0;color:#eee8ff}
-main{padding:26px 16px 50px}.tabs,.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
-button{border:0;border-radius:11px;padding:12px 16px;font-weight:800;cursor:pointer;background:var(--navy);color:white}button.secondary{background:#eee9f6;color:var(--navy)}button:disabled{opacity:.55}
-.panel,.card{background:white;border:1px solid var(--line);border-radius:17px;padding:21px;margin-bottom:17px;box-shadow:0 12px 32px #17104412}
-h2,h3{color:var(--navy);margin:0 0 7px}.muted{color:var(--muted);font-size:14px}
-.axis{margin:22px 0 10px;padding:13px 15px;background:#eee9f7;border-left:5px solid var(--pink);border-radius:10px}
-.question{padding:16px 0;border-bottom:1px solid var(--line)}.question p{font-weight:700;margin:0 0 11px}
-.options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.option{border:1px solid var(--line);padding:10px;border-radius:10px;text-align:center;font-size:13px;font-weight:700;cursor:pointer}.option input{accent-color:var(--purple)}.option:has(input:checked){background:#f2edfb;border-color:var(--purple)}
-textarea,input{width:100%;padding:12px;border:1px solid #d9d2e5;border-radius:10px;font:inherit}textarea{min-height:76px;resize:vertical}.field{margin:12px 0}.field label{font-weight:700;display:block;margin-bottom:6px}
-.hidden{display:none!important}.status{font-size:14px;margin-top:10px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.metric{background:#f8f6fb;border-radius:13px;padding:15px}.metric strong{display:block;font-size:29px;color:var(--navy)}.metric span{font-size:13px;color:var(--muted)}
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:15px}.chartbox{min-height:280px;border:1px solid var(--line);border-radius:13px;padding:15px}.chartbox canvas{max-height:245px}
-.analysis{background:#f8f6fb;border-left:4px solid var(--cyan);padding:13px 15px;border-radius:9px;margin:9px 0}
-table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:9px;border-bottom:1px solid var(--line)}th{background:#f3eff9;color:var(--navy)}
-.pill{display:inline-block;background:#e9f8bd;color:#344500;border-radius:30px;padding:4px 9px;font-size:12px;font-weight:bold}
-footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
-@media(max-width:720px){.grid{grid-template-columns:1fr 1fr}.charts{grid-template-columns:1fr}.options{grid-template-columns:1fr 1fr}.panel{padding:16px}}
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Condensed:wght@400;500;700;800;900&family=Special+Elite&display=swap');
+:root{--ink:#17152c;--paper:#f4edda;--cream:#fff9e9;--pink:#ff5b73;--cyan:#55d7df;--lime:#c7f34b;--purple:#7047d7;--gold:#ffca63;--muted:#655c6d;--line:#d8cdb7}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#19162f;color:var(--ink);font-family:'Roboto Condensed',sans-serif;font-size:16px;line-height:1.5}
+.shell{max-width:1200px;margin:auto;background:var(--paper);min-height:100vh;box-shadow:0 0 50px #0008}
+.top-strip{background:var(--ink);color:var(--lime);padding:10px 4%;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font:10px 'Press Start 2P';letter-spacing:.5px}
+header{background:radial-gradient(circle at 80% 20%,#fff4 0 3px,transparent 4px),linear-gradient(135deg,#211747,#3d246f 60%,#17152c);color:white;padding:32px 5% 30px;border-bottom:8px solid var(--gold);position:relative;overflow:hidden}
+header:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 5px,#0001 6px);pointer-events:none}
+.top{max-width:1100px;margin:auto;position:relative;z-index:1}
+.brand{font:10px 'Press Start 2P';letter-spacing:.04em;color:var(--lime);line-height:1.8}
+h1{font:clamp(23px,5vw,48px)/1.35 'Press Start 2P';color:var(--lime);text-shadow:4px 4px 0 #ec4d8d,7px 7px 0 #080617;margin:14px 0}
+header p{font:clamp(14px,2vw,20px)/1.5 'Special Elite';color:#fff2d4;margin:0;max-width:760px}
+main{max-width:1200px;margin:auto;padding:25px 4% 55px}
+.tabs,.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.tabs{padding:12px;background:#e7d9bd;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+button{border:3px solid var(--ink);border-radius:0;padding:12px 15px;font:10px 'Press Start 2P';line-height:1.7;cursor:pointer;background:var(--lime);color:var(--ink);box-shadow:4px 4px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+button:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink)}
+button.secondary{background:var(--cream);color:var(--ink)}
+button:disabled{opacity:.55;cursor:not-allowed}
+.panel,.card{background:var(--cream);border:3px solid var(--ink);border-radius:0;padding:21px;margin-bottom:18px;box-shadow:6px 6px 0 var(--ink)}
+h2,h3{font-family:'Press Start 2P';color:var(--ink);line-height:1.7;margin:0 0 10px}
+h2{font-size:clamp(14px,2vw,19px)}
+h3{font-size:12px}
+.muted{color:var(--muted);font-size:14px}
+.axis{margin:24px 0 10px;padding:13px 15px;background:#e9e0ff;border-left:7px solid var(--purple);border-radius:0;font-weight:700}
+.question{padding:16px 0;border-bottom:1px dashed #b7aa91}
+.question p{font-weight:800;margin:0 0 11px;font-size:17px;line-height:1.45}
+.options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.option{border:2px solid var(--ink);padding:10px 8px;border-radius:0;text-align:center;font-size:13px;font-weight:800;cursor:pointer;background:#fffdf6;box-shadow:2px 2px 0 #b9ad98}
+.option input{width:auto;margin-right:5px;accent-color:var(--purple)}
+.option:has(input:checked){background:#d9f3e7;border-color:#267b73;box-shadow:3px 3px 0 #267b73}
+textarea,input{width:100%;padding:12px;border:2px solid var(--ink);border-radius:0;background:white;font:16px 'Roboto Condensed',sans-serif;color:var(--ink)}
+textarea{min-height:90px;resize:vertical}
+.field{margin:14px 0}
+.field label{font-weight:900;display:block;margin-bottom:7px}
+.hidden{display:none!important}
+.status{font-size:14px;margin-top:10px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.metric{background:#e9e0ff;border:2px solid var(--ink);border-radius:0;padding:15px;box-shadow:3px 3px 0 var(--ink)}
+.metric strong{display:block;font:clamp(17px,3vw,27px) 'Press Start 2P';color:#7047d7;margin-bottom:9px}
+.metric span{font-size:13px;color:var(--muted);font-weight:800}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.chartbox{min-height:280px;border:3px solid var(--ink);border-radius:0;padding:15px;background:#fffdf6;box-shadow:4px 4px 0 #c6b99f}
+.chartbox canvas{max-height:245px}
+.analysis{background:#d9f3e7;border-left:7px solid #267b73;padding:13px 15px;border-radius:0;margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{text-align:left;padding:10px;border-bottom:1px solid var(--line)}
+th{background:#e7d9bd;color:var(--ink);font-weight:900}
+.pill{display:inline-block;background:var(--lime);color:#344500;border:2px solid var(--ink);border-radius:0;padding:4px 9px;font-size:12px;font-weight:900}
+footer{text-align:center;color:#fff1d0;background:var(--ink);font:12px 'Special Elite';line-height:1.7;padding:25px 5%}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.charts{grid-template-columns:1fr}}
+@media(max-width:600px){
+ .top-strip{font-size:8px;line-height:1.8}
+ header{padding:25px 5% 24px}
+ main{padding:18px 4% 40px}
+ .panel,.card{padding:15px;box-shadow:4px 4px 0 var(--ink)}
+ .tabs{gap:8px}
+ .tabs button{flex:1 1 100%;font-size:9px}
+ .options{grid-template-columns:1fr 1fr}
+ .option{font-size:12px;text-align:left}
+ .grid{grid-template-columns:1fr 1fr;gap:9px}
+ .metric{padding:11px}
+ .metric strong{font-size:15px;overflow-wrap:anywhere}
+ .charts{grid-template-columns:1fr}
+ .chartbox{min-height:250px;padding:10px}
+ .actions button{flex:1 1 100%}
+ .question p{font-size:15px}
+ h2{font-size:13px}
+}
+
 </style></head><body>
+<div class="shell">
+<div class="top-strip"><span>ARQUIVO 80 • PRODUTO EDUCACIONAL</span><span>CRIATIVA QUEST • CENTRAL DE AVALIAÇÃO</span></div>
 <header><div class="top"><div class="brand">PRODUTO EDUCACIONAL • AVALIAÇÃO</div><h1>CRIATIVA QUEST</h1><p>A aventura da publicidade brasileira — questionário de avaliação do produto educacional.</p></div></header>
 <main>
-<div class="tabs"><button id="tabForm" onclick="showView('form')">Responder questionário</button><button class="secondary" id="tabAdmin" onclick="showView('admin')">Painel administrativo</button></div>
+<div class="tabs"><button class="secondary" type="button" onclick="location.href='index.html'">← Voltar ao jogo</button><button id="tabForm" onclick="showView('form')">Responder questionário</button><button class="secondary" id="tabAdmin" onclick="showView('admin')">Painel administrativo</button></div>
 <section id="formView" class="panel"><h2>Avaliação do Criativa Quest</h2><p class="muted">Leia cada afirmação após explorar o jogo e marque uma única alternativa. São 15 afirmações em três eixos e três perguntas abertas opcionais.</p>
 <div id="questions"></div>
 <div class="field"><label>16. Quais aspectos do jogo você considera mais positivos? (opcional)</label><textarea id="positive" maxlength="1500"></textarea></div>
@@ -45,6 +100,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
 <div class="panel"><h3>Análise automática dos resultados</h3><div id="autoAnalysis"></div></div><div class="panel"><h3>Respostas abertas</h3><div id="openAnswers"></div></div>
 <div class="panel"><h3>Dados das avaliações</h3><div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Geral</th><th>Comunicacional</th><th>Conceitual</th><th>Pedagógico</th></tr></thead><tbody id="responseTable"></tbody></table></div></div>
 </div></section></main><footer>Criativa Quest • Avaliação do Produto Educacional</footer>
+</div>
 <script>
 /* Preencha com a URL e a chave anon/public do seu projeto Supabase. Nunca use service_role no navegador. */
 const SUPABASE_URL="COLE_AQUI_A_URL_DO_PROJETO";
